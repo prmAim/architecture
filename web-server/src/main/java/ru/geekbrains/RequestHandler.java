@@ -1,47 +1,56 @@
 package ru.geekbrains;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.Files;
+import java.util.Deque;
 
 public class RequestHandler implements Runnable {
-  private final Socket socket;
-  private final String folder;
-  private final HttpMessage httpMessage;
+    private final SocketService socketService;
+    private final FileService fileService;
 
-  public RequestHandler(Socket socket, String folder) {
-    this.socket = socket;
-    this.folder = folder;
-    this.httpMessage = new HttpMessage();
-  }
+  public RequestHandler(SocketService socketService, FileService fileService) {
+        this.socketService = socketService;
+        this.fileService = fileService;
+    }
 
-  @Override
-  public void run() {
-    try {
-      InOutStreams inOutStream = new InOutStreamsImpl(socket);
-      while (!inOutStream.getStatus()) ;
+    @Override
+    public void run() {
+        Deque<String> rawRequest = socketService.readRequest();
 
-      PathFiles pathFiles = new PathFiles(folder, inOutStream.inputStreamReadLine());
+        // Получаем первую строку
+        String firstLine = rawRequest.pollFirst();
+        String[] parts = firstLine.split(" ");
 
-      if (pathFiles.isExistsFile()) {
-        inOutStream.sendResponse(httpMessage.getMessenges(404));
-        return;
-      }
+        if (!fileService.exists(parts[1])){
+          String rawResponce = "HTTP/1.1 404 NOT_FOUND\n"
+                  + "Content-Type: text/html; charset=utf-8\n"
+                  + "\n"
+                  + "<h1>Файл не найден!</h1>";
+          // Отправка данных клиенту
+          socketService.writeResponse(rawResponce);
+        }
 
-      inOutStream.sendResponse(httpMessage.getMessenges(200));
+        if (fileService.isDirectory(parts[1])){
+          String rawResponce = "HTTP/1.1 500 Internal Server Error\n"
+                  + "Content-Type: text/html; charset=utf-8\n"
+                  + "\n"
+                  + "<h1>Не указан фаил!</h1>";
+          // Отправка данных клиенту
+          socketService.writeResponse(rawResponce);
+        } else {
+          String rawResponce = "HTTP/1.1 200 OK\n"
+                  + "Content-Type: text/html; charset=utf-8\n"
+                  + "\n"
+                  + fileService.readFile(parts[1]);     // данные из файла
 
-      Files.newBufferedReader(pathFiles.getPathFile()).transferTo(inOutStream.getOutput());
-    } catch (
-            IOException e) {
-      e.printStackTrace();
-    } finally {
-      System.out.println("LOG: Client disconnected!");
+          // Отправка данных клиенту
+          socketService.writeResponse(rawResponce);
+        }
+
+      // Закрываем соединение. Что бы избежать утечки ресурсов.
       try {
-        socket.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+        socketService.close();
+      } catch (IOException ex) {
+        ex.printStackTrace();
       }
     }
-  }
 }

@@ -17,7 +17,8 @@ public class WebServer {
         Socket socket = serverSocket.accept();
         System.out.println("New client connected!");
 
-        new Thread(new RequestHandler(socket, WWW)).start();
+        // Уменьшение связаности объектов!!!
+        new Thread(new RequestHandler(new SocketService(socket), new FileService(WWW))).start();
       }
     } catch (IOException e) {
       e.printStackTrace();
