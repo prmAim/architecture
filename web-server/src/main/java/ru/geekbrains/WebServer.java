@@ -6,20 +6,22 @@ import java.net.Socket;
 
 public class WebServer {
 
-    private static String WWW = "web-server/www";
+  private static String WWW = "web-server/www";
+  private static final int PORT = 8080;
 
-    public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(8088)) {
-            System.out.println("Server started!");
+  public static void main(String[] args) {
+    try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+      System.out.println("Server started!");
 
-            while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("New client connected!");
+      while (true) {
+        Socket socket = serverSocket.accept();
+        System.out.println("New client connected!");
 
-                new Thread(new RequestHandler(socket, WWW)).start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Уменьшение связаности объектов!!!
+        new Thread(new RequestHandler(new SocketService(socket), new FileService(WWW))).start();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 }
