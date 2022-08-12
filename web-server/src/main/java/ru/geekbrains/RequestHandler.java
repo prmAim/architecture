@@ -1,59 +1,59 @@
 package ru.geekbrains;
 
+import ru.geekbrains.domain.HttpRequest;
+import ru.geekbrains.domain.HttpResponce;
 import ru.geekbrains.service.FileService;
 import ru.geekbrains.service.SocketService;
 
 import java.io.IOException;
-import java.util.Deque;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class RequestHandler implements Runnable {
-    private final SocketService socketService;
-    private final FileService fileService;
+  private final SocketService socketService;
+  private final FileService fileService;
 
   public RequestHandler(SocketService socketService, FileService fileService) {
-        this.socketService = socketService;
-        this.fileService = fileService;
+    this.socketService = socketService;
+    this.fileService = fileService;
+  }
+
+  @Override
+  public void run() {
+    // разбор запроса от клиента
+    HttpRequest httpRequest = new RequestParser().parse(socketService.readRequest());
+
+    if (!fileService.exists(httpRequest.getPath())) {
+      String rawResponce = "HTTP/1.1 404 NOT_FOUND\n"
+              + "Content-Type: text/html; charset=utf-8\n"
+              + "\n"
+              + "<h1>Файл не найден!</h1>";
+      // Отправка данных клиенту
+      socketService.writeResponse(new ResponceSerializer()
+              .serialaze(new HttpResponce(404
+                      , new HashSet<>(Arrays.asList("Content-Type"))
+                      , "<h1>Файл не найден!</h1>")));
     }
 
-    @Override
-    public void run() {
-        Deque<String> rawRequest = socketService.readRequest();
-
-        // Получаем первую строку
-        String firstLine = rawRequest.pollFirst();
-        String[] parts = firstLine.split(" ");
-
-        if (!fileService.exists(parts[1])){
-          String rawResponce = "HTTP/1.1 404 NOT_FOUND\n"
-                  + "Content-Type: text/html; charset=utf-8\n"
-                  + "\n"
-                  + "<h1>Файл не найден!</h1>";
-          // Отправка данных клиенту
-          socketService.writeResponse(rawResponce);
-        }
-
-        if (fileService.isDirectory(parts[1])){
-          String rawResponce = "HTTP/1.1 500 Internal Server Error\n"
-                  + "Content-Type: text/html; charset=utf-8\n"
-                  + "\n"
-                  + "<h1>Не указан фаил!</h1>";
-          // Отправка данных клиенту
-          socketService.writeResponse(rawResponce);
-        } else {
-          String rawResponce = "HTTP/1.1 200 OK\n"
-                  + "Content-Type: text/html; charset=utf-8\n"
-                  + "\n"
-                  + fileService.readFile(parts[1]);     // данные из файла
-
-          // Отправка данных клиенту
-          socketService.writeResponse(rawResponce);
-        }
-
-      // Закрываем соединение. Что бы избежать утечки ресурсов.
-      try {
-        socketService.close();
-      } catch (IOException ex) {
-        ex.printStackTrace();
-      }
+    if (fileService.isDirectory(httpRequest.getPath())) {
+      // Отправка данных клиенту
+      socketService.writeResponse(new ResponceSerializer()
+              .serialaze(new HttpResponce(500
+                      , new HashSet<>(Arrays.asList("Content-Type"))
+                      , "<h1>Не указан фаил!</h1>")));
+    } else {
+      // Отправка данных клиенту
+      socketService.writeResponse(new ResponceSerializer()
+              .serialaze(new HttpResponce(200
+                      , new HashSet<>(Arrays.asList("Content-Type"))
+                      , fileService.readFile(httpRequest.getPath()))));
     }
+
+    // Закрываем соединение. Что бы избежать утечки ресурсов.
+    try {
+      socketService.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+  }
 }

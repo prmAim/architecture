@@ -8,7 +8,6 @@ public class ResponceSerializer {
      * Объединение в ответ
      */
     public String serialaze(HttpResponce httpResponce){
-        // TODO
-        return "";
+        return httpResponce.getStatusHttp() + httpResponce.getAllHeaders() + "\n" + httpResponce.getBody();
     }
 }
