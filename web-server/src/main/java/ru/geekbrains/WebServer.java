@@ -14,11 +14,11 @@ public class WebServer {
 
   public static void main(String[] args) {
     try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-      System.out.println("Server started!");
+      System.out.println("LOG: Server started!");
 
       while (true) {
         Socket socket = serverSocket.accept();
-        System.out.println("New client connected!");
+        System.out.println("LOG: New client connected!");
 
         // Уменьшение связаности объектов!!!
         new Thread(new RequestHandler(new SocketService(socket), new FileService(WWW))).start();
