@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.LinkedList;
 
+
 public class SocketService implements Closeable {
 
     private final Socket socket;
@@ -14,38 +15,30 @@ public class SocketService implements Closeable {
         this.socket = socket;
     }
 
-    /**
-     * Чтение данных запроса от клиента
-     */
     public Deque<String> readRequest() {
         try {
-            // открываем поток
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            BufferedReader input = new BufferedReader(
+                    new InputStreamReader(
+                            socket.getInputStream(), StandardCharsets.UTF_8));
 
-            // Ожидаем пока не придут данные из сокета
             while (!input.ready());
 
-            Deque<String> responce = new LinkedList<>();
-
-            // Ожидаем пока не придут данные из сокета
-            while(input.ready()){
+            Deque<String> response = new LinkedList<>();
+            while (input.ready()) {
                 String line = input.readLine();
-                System.out.println("LOG: " + line);
-                responce.add(line);
+                System.out.println(line);
+                response.add(line);
             }
-            return responce;
+            return response;
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         }
     }
 
-    /**
-     * Отправка ответа клиенту
-     */
-    public void writeResponse(String rawResponce) {
+    public void writeResponse(String rawResponse) {
         try {
             PrintWriter output = new PrintWriter(socket.getOutputStream());
-            output.print(rawResponce);
+            output.print(rawResponse);
             output.flush();
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
@@ -54,9 +47,8 @@ public class SocketService implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (!socket.isClosed() || socket != null){
+        if (!socket.isClosed()) {
             socket.close();
-            System.out.println("LOG: Socket close!");
         }
     }
 }

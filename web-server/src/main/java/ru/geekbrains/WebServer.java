@@ -1,5 +1,6 @@
 package ru.geekbrains;
 
+import ru.geekbrains.config.*;
 import ru.geekbrains.service.FileService;
 import ru.geekbrains.service.SocketService;
 
@@ -8,23 +9,26 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class WebServer {
+    public static void main(String[] args) {
+        // Pattern Factory = + связаность компонентов низкая
+        ServerConfig config = ServerConfigFactory.create(args);
 
-  private static String WWW = "web-server/www";
-  private static final int PORT = 8080;
+        try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
+            System.out.println("Server started!");
 
-  public static void main(String[] args) {
-    try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-      System.out.println("LOG: Server started!");
+            while (true) {
+                Socket socket = serverSocket.accept();
+                System.out.println("New client connected!");
 
-      while (true) {
-        Socket socket = serverSocket.accept();
-        System.out.println("LOG: New client connected!");
-
-        // Уменьшение связаности объектов!!!
-        new Thread(new RequestHandler(new SocketService(socket), new FileService(WWW))).start();
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
+                new Thread(new RequestHandler(
+                        new SocketService(socket),
+                        new FileService(config.getWww()),
+                        new RequestParser(),
+                        new ResponseSerializer()
+                )).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-  }
 }

@@ -1,24 +1,25 @@
 package ru.geekbrains.domain;
 
+import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Класс запроса
- */
 public class HttpRequest {
 
-    private String method;                  // Метод HTTP запроса
-    private String path;                    // URL запроса
-    private Map<String, String> header;     // Коллекция заголовков запроса
-    private String body;                    // Тело запроса
+    private String method;
+
+    private String url;
+
+    private Map<String, String> headers = new HashMap<>();
+
+    private String body;
 
     public HttpRequest() {
     }
 
-    public HttpRequest(String method, String path, Map<String, String> header, String body) {
+    public HttpRequest(String method, String url, Map<String, String> headers, String body) {
         this.method = method;
-        this.path = path;
-        this.header = header;
+        this.url = url;
+        this.headers = headers;
         this.body = body;
     }
 
@@ -30,20 +31,20 @@ public class HttpRequest {
         this.method = method;
     }
 
-    public String getPath() {
-        return path;
+    public String getUrl() {
+        return url;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     public String getBody() {

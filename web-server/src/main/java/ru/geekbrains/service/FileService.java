@@ -12,21 +12,21 @@ public class FileService {
         this.rootDir = rootDir;
     }
 
-    public boolean exists(String filename){
+    public boolean exists(String filename) {
         return Files.exists(Path.of(rootDir, filename));
     }
 
-    public boolean isDirectory(String filename){
+    public boolean isDirectory(String filename) {
         return Files.isDirectory(Path.of(rootDir, filename));
     }
 
-    public String readFile(String filename){
-        StringBuilder dateFromFile = new StringBuilder();
+    public String readFile(String filename) {
         try {
-            Files.readAllLines(Path.of(rootDir, filename)).forEach(dateFromFile::append);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
+            StringBuilder sb = new StringBuilder();
+            Files.readAllLines(Path.of(rootDir, filename)).forEach(sb::append);
+            return sb.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return dateFromFile.toString();
     }
 }

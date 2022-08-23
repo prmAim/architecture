@@ -1,59 +1,57 @@
 package ru.geekbrains;
 
 import ru.geekbrains.domain.HttpRequest;
-import ru.geekbrains.domain.HttpResponce;
+import ru.geekbrains.domain.HttpResponse;
 import ru.geekbrains.service.FileService;
 import ru.geekbrains.service.SocketService;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Deque;
 
 public class RequestHandler implements Runnable {
-  private final SocketService socketService;
-  private final FileService fileService;
 
-  public RequestHandler(SocketService socketService, FileService fileService) {
-    this.socketService = socketService;
-    this.fileService = fileService;
-  }
+    private final SocketService socketService;
 
-  @Override
-  public void run() {
-    // разбор запроса от клиента
-    HttpRequest httpRequest = new RequestParser().parse(socketService.readRequest());
+    private final FileService fileService;
+    private final RequestParser requestParser;
+    private final ResponseSerializer responseSerializer;
 
-    if (!fileService.exists(httpRequest.getPath())) {
-      String rawResponce = "HTTP/1.1 404 NOT_FOUND\n"
-              + "Content-Type: text/html; charset=utf-8\n"
-              + "\n"
-              + "<h1>Файл не найден!</h1>";
-      // Отправка данных клиенту
-      socketService.writeResponse(new ResponceSerializer()
-              .serialaze(new HttpResponce(404
-                      , new HashSet<>(Arrays.asList("Content-Type"))
-                      , "<h1>Файл не найден!</h1>")));
+    public RequestHandler(SocketService socketService,
+                          FileService fileService,
+                          RequestParser requestParser,
+                          ResponseSerializer responseSerializer) {
+        this.socketService = socketService;
+        this.fileService = fileService;
+        this.requestParser = requestParser;
+        this.responseSerializer = responseSerializer;
     }
 
-    if (fileService.isDirectory(httpRequest.getPath())) {
-      // Отправка данных клиенту
-      socketService.writeResponse(new ResponceSerializer()
-              .serialaze(new HttpResponce(500
-                      , new HashSet<>(Arrays.asList("Content-Type"))
-                      , "<h1>Не указан фаил!</h1>")));
-    } else {
-      // Отправка данных клиенту
-      socketService.writeResponse(new ResponceSerializer()
-              .serialaze(new HttpResponce(200
-                      , new HashSet<>(Arrays.asList("Content-Type"))
-                      , fileService.readFile(httpRequest.getPath()))));
-    }
+    @Override
+    public void run() {
+        Deque<String> rawRequest = socketService.readRequest();
+        HttpRequest req = requestParser.parse(rawRequest);
 
-    // Закрываем соединение. Что бы избежать утечки ресурсов.
-    try {
-      socketService.close();
-    } catch (IOException ex) {
-      ex.printStackTrace();
+        if (!fileService.exists(req.getUrl())) {
+            HttpResponse resp = new HttpResponse();
+            resp.setStatusCode(404);
+            resp.setStatusCodeName("NOT_FOUND");
+            resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
+            socketService.writeResponse(responseSerializer.serialize(resp));
+            return;
+        }
+
+        HttpResponse resp = new HttpResponse();
+        resp.setStatusCode(200);
+        resp.setStatusCodeName("OK");
+        resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
+        resp.setBody(fileService.readFile(req.getUrl()));
+        socketService.writeResponse(responseSerializer.serialize(resp));
+
+        try {
+            socketService.close();
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+        System.out.println("Client disconnected!");
     }
-  }
 }
