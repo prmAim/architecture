@@ -6,11 +6,16 @@ import java.util.Deque;
 
 public class RequestParser {
 
-    public HttpRequest parse(Deque<String> rawRequest) {
-        HttpRequest httpRequest = new HttpRequest();
-        String[] firstLine = rawRequest.pollFirst().split(" ");
-        httpRequest.setMethod(firstLine[0]);
-        httpRequest.setUrl(firstLine[1]);
+  /**
+   * Парсиниг строки запроса
+   */
+  public HttpRequest parse(Deque<String> rawRequest){
+    HttpRequest httpRequest = new HttpRequest();
+
+    httpRequest.setBody(rawRequest.pollLast());
+    String[] method = rawRequest.pollFirst().split(" ", 3);
+    httpRequest.setMethod(method[0]);
+    httpRequest.setUrl(method[1]);
 
         while (!rawRequest.isEmpty()) {
             String line = rawRequest.pollFirst();

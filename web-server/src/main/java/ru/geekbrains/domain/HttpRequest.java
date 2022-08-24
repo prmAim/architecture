@@ -3,15 +3,18 @@ package ru.geekbrains.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс запроса
+ */
 public class HttpRequest {
 
-    private String method;
+    private String method;                                  // Метод HTTP запроса
 
-    private String url;
+    private String url;                                     // URL запроса
 
-    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();  // Коллекция заголовков запроса
 
-    private String body;
+    private String body;                                    // Тело запроса
 
     public HttpRequest() {
     }

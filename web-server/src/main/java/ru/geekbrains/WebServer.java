@@ -14,12 +14,13 @@ public class WebServer {
         ServerConfig config = ServerConfigFactory.create(args);
 
         try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
-            System.out.println("Server started!");
+            System.out.println("LOG: Server started! Port: " + config.getPort());
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("New client connected!");
+                System.out.println("LOG: New client connected!");
 
+                // Уменьшение связаности объектов!!!
                 new Thread(new RequestHandler(
                         new SocketService(socket),
                         new FileService(config.getWww()),

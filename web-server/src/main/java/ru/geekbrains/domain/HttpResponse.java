@@ -3,15 +3,18 @@ package ru.geekbrains.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс ответа
+ */
 public class HttpResponse {
 
-    private int statusCode;
+    private int statusCode;                                 // статус ответа
 
-    private String statusCodeName;
+    private String statusCodeName;                          // заголовки ответа
 
-    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();  // заголовки ответа
 
-    private String body;
+    private String body;                                    // тело ответа
 
     public HttpResponse() {
     }

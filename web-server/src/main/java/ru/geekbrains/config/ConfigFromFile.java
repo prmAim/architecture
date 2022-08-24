@@ -13,9 +13,11 @@ class ConfigFromFile implements ServerConfig {
     private final int port;
 
     public ConfigFromFile(String filename) {
-        System.out.println("Getting config from config file");
+        System.out.println("LOG: Getting config from config file");
+
         Properties prop = new Properties();
         try {
+            // загрузка данных
             prop.load(getClass().getResourceAsStream(filename));
         } catch (IOException e) {
             throw new RuntimeException(e);

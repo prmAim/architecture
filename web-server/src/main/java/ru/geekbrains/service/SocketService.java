@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.LinkedList;
 
-
 public class SocketService implements Closeable {
 
     private final Socket socket;
@@ -15,18 +14,25 @@ public class SocketService implements Closeable {
         this.socket = socket;
     }
 
+    /**
+     * Чтение данных запроса от клиента
+     */
     public Deque<String> readRequest() {
         try {
+            // открываем поток
             BufferedReader input = new BufferedReader(
                     new InputStreamReader(
                             socket.getInputStream(), StandardCharsets.UTF_8));
 
+            // Ожидаем пока не придут данные из сокета
             while (!input.ready());
 
             Deque<String> response = new LinkedList<>();
+
+            // Ожидаем пока не придут данные из сокета
             while (input.ready()) {
                 String line = input.readLine();
-                System.out.println(line);
+                System.out.println("LOG: " + line);
                 response.add(line);
             }
             return response;
@@ -35,6 +41,9 @@ public class SocketService implements Closeable {
         }
     }
 
+    /**
+     * Отправка ответа клиенту
+     */
     public void writeResponse(String rawResponse) {
         try {
             PrintWriter output = new PrintWriter(socket.getOutputStream());
@@ -49,6 +58,7 @@ public class SocketService implements Closeable {
     public void close() throws IOException {
         if (!socket.isClosed()) {
             socket.close();
+            System.out.println("LOG: Socket close!");
         }
     }
 }

@@ -7,7 +7,7 @@ class ConfigFromFixedValues implements ServerConfig {
 
     @Override
     public String getWww() {
-        return "/Users/aleks/dev/geek-architecture-02/www";
+        return "web-server/www";
     }
 
     @Override
