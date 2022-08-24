@@ -9,7 +9,7 @@ class ConfigFromCli implements ServerConfig {
 
     private final int port;
 
-    public ConfigFromCli(String[] args) {
+    ConfigFromCli(String[] args) {
         System.out.println("LOG: Getting config from command line parameters");
         if (args.length < 2) {
             throw new IllegalStateException("Not enough parameter specified");
