@@ -9,13 +9,14 @@ class RequestParserImpl implements RequestParser{
   /**
    * Парсиниг строки запроса
    */
-  public HttpRequest parse(Deque<String> rawRequest){
-    HttpRequest httpRequest = new HttpRequest();
+  public HttpRequest parse(Deque<String> rawRequest) {
+      String[] method = rawRequest.pollFirst().split(" ", 3);
 
-    httpRequest.setBody(rawRequest.pollLast());
-    String[] method = rawRequest.pollFirst().split(" ", 3);
-    httpRequest.setMethod(method[0]);
-    httpRequest.setUrl(method[1]);
+      HttpRequest httpRequest = HttpRequest.createBuilder()
+              .withBody(rawRequest.pollLast())
+              .withMethod(method[0])
+              .withUrl(method[1])
+              .builder();
 
         while (!rawRequest.isEmpty()) {
             String line = rawRequest.pollFirst();
