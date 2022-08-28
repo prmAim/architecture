@@ -16,15 +16,8 @@ public class HttpRequest {
 
     private String body;                                    // Тело запроса
 
-    public HttpRequest() {
-    }
-
-    public HttpRequest(String method, String url, Map<String, String> headers, String body) {
-        this.method = method;
-        this.url = url;
-        this.headers = headers;
-        this.body = body;
-    }
+  private HttpRequest() {
+  }
 
     public String getMethod() {
         return method;
@@ -54,7 +47,49 @@ public class HttpRequest {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+  public void setBody(String body) {
+    this.body = body;
+  }
+
+  /**
+   * Фабричный метод для создания Pattern Builder класса HttpRequest
+   */
+  public static Builder createBuilder() {
+    return new Builder();
+  }
+
+  /**
+   * Внутрений класс для создания Pattern Builder
+   */
+  public static class Builder {
+    private final HttpRequest httpRequest;
+
+    public Builder() {
+      this.httpRequest = new HttpRequest();
     }
+
+    public Builder withMethod(String method) {
+      this.httpRequest.method = method;
+      return this;
+    }
+
+    public Builder withUrl(String url) {
+      this.httpRequest.url = url;
+      return this;
+    }
+
+    public Builder withBody(String body) {
+      this.httpRequest.body = body;
+      return this;
+    }
+
+    public Builder withBody(Map<String, String> headers) {
+      this.httpRequest.headers = headers;
+      return this;
+    }
+
+    public HttpRequest builder() {
+      return httpRequest;
+    }
+  }
 }

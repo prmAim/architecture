@@ -16,7 +16,7 @@ public class HttpResponse {
 
     private String body;                                    // тело ответа
 
-    public HttpResponse() {
+    private HttpResponse() {
     }
 
     public int getStatusCode() {
@@ -49,5 +49,44 @@ public class HttpResponse {
 
     public void setStatusCodeName(String statusCodeName) {
         this.statusCodeName = statusCodeName;
+    }
+
+    /**
+     * Фабричный метод для создания Pattern Builder класса HttpResponse
+     */
+    public static Builder createBuilder(){
+        return new Builder();
+    }
+
+    /**
+     * Внутрений класс для создания Pattern Builder
+     */
+    public static class Builder{
+
+        private final HttpResponse httpResponse;
+
+        public Builder(){
+            this.httpResponse = new HttpResponse();
+        }
+        public Builder withStatusCode(int statusCode){
+            this.httpResponse.statusCode = statusCode;
+            return this;
+        }
+        public Builder withStatusCodeName(String statusCodeName){
+            this.httpResponse.statusCodeName = statusCodeName;
+            return this;
+        }
+        public Builder withHeaders(Map<String, String> headers){
+            this.httpResponse.headers = headers;
+            return this;
+        }
+        public Builder withBody(String body){
+            this.httpResponse.body = body;
+            return this;
+        }
+
+        public HttpResponse builder(){
+            return this.httpResponse;
+        }
     }
 }

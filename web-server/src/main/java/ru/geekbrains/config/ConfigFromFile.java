@@ -12,7 +12,7 @@ class ConfigFromFile implements ServerConfig {
 
     private final int port;
 
-    public ConfigFromFile(String filename) {
+    ConfigFromFile(String filename) {
         System.out.println("LOG: Getting config from config file");
 
         Properties prop = new Properties();

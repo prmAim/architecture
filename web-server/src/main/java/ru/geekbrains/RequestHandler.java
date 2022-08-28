@@ -32,33 +32,39 @@ public class RequestHandler implements Runnable {
         // разбор запроса от клиента
         HttpRequest req = requestParser.parse(rawRequest);
 
-        if (!fileService.exists(req.getUrl())) {
-            HttpResponse resp = new HttpResponse();
-            resp.setStatusCode(404);
-            resp.setStatusCodeName("NOT_FOUND");
-            resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
-            resp.setBody("<h1>Указаный фаил не найден!</h1>");
-            // Отправка данных клиенту
-            socketService.writeResponse(responseSerializer.serialize(resp));
-            return;
-        }
+      if (!fileService.exists(req.getUrl())) {
+          HttpResponse resp = HttpResponse.createBuilder()
+                  .withStatusCode(404)
+                  .withStatusCodeName("NOT_FOUND")
+                  .withBody("<h1>Указаный фаил не найден!</h1>")
+                  .builder();
+          resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
+          // Отправка данных клиенту
+          socketService.writeResponse(responseSerializer.serialize(resp));
+          return;
+      }
 
-        if (fileService.isDirectory(req.getUrl())) {
-            HttpResponse resp = new HttpResponse();
-            resp.setStatusCode(500);
-            resp.setStatusCodeName("Internal Server Error");
-            resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
-            resp.setBody("<h1>Не указан фаил!</h1>");
-            // Отправка данных клиенту
-            socketService.writeResponse(responseSerializer.serialize(resp));
-        } else {
-            HttpResponse resp = new HttpResponse();
-            resp.setStatusCode(200);
-            resp.setStatusCodeName("OK");
-            resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
-            resp.setBody(fileService.readFile(req.getUrl()));
-            socketService.writeResponse(responseSerializer.serialize(resp));
-        }
+      if (fileService.isDirectory(req.getUrl())) {
+          HttpResponse resp = HttpResponse.createBuilder()
+                  .withStatusCode(500)
+                  .withStatusCodeName("Internal Server Error")
+                  .withBody("<h1>Не указан фаил!</h1>")
+                  .builder();
+          resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
+
+          // Отправка данных клиенту
+          socketService.writeResponse(responseSerializer.serialize(resp));
+      } else {
+          HttpResponse resp = HttpResponse.createBuilder()
+                  .withStatusCode(200)
+                  .withStatusCodeName("OK")
+                  .withBody(fileService.readFile(req.getUrl()))
+                  .builder();
+          resp.getHeaders().put("Content-Type", "text/html; charset=utf-8");
+
+          // Отправка данных клиенту
+          socketService.writeResponse(responseSerializer.serialize(resp));
+      }
 
         try {
             socketService.close();

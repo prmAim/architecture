@@ -11,14 +11,13 @@ import java.util.LinkedList;
  * Класс для тестирования класса HttpRequest
  */
 public class RequestParserTest {
-
   private static final String rawTestRequest =
           "GET /index.html HTTP/1.1\n" +
                   "Host: localhost:8080\n" +
                   "Connection: keep-alive\n" +
                   "\n";
 
-  private final RequestParser requestParser = new RequestParser();
+  private final RequestParserImpl requestParser = new RequestParserImpl();
 
   @Test
   public void testParsing() {
